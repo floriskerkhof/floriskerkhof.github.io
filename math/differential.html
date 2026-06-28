@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Differential — Math from first principles</title>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['\\(', '\\)'], ['$', '$']] } };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-soft: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --line: #374151;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, .12);
+      --good: #86efac;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0, var(--bg) 52%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    main { max-width: 980px; margin: 0 auto; padding: 48px 18px 80px; }
+    a { color: var(--accent); }
+    .back { display: inline-block; margin-bottom: 28px; color: var(--muted); text-decoration: none; }
+    h1 { font-size: clamp(2.2rem, 5vw, 4.5rem); line-height: 1; margin: 0 0 14px; letter-spacing: -0.06em; }
+    h2 { margin: 0 0 12px; font-size: 1.35rem; }
+    p { margin: 0 0 14px; }
+    .lead { max-width: 760px; color: var(--muted); font-size: 1.15rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 32px 0; }
+    .card, details, .playground {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    }
+    .tag { color: var(--accent); font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; font-weight: 800; margin-bottom: 8px; }
+    .formula {
+      background: #020617;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 14px 0;
+      overflow-x: auto;
+      font-size: 1.15rem;
+    }
+    details { margin: 12px 0; background: rgba(17,24,39,.72); }
+    summary { cursor: pointer; font-weight: 800; color: #fff; }
+    summary::marker { color: var(--accent); }
+    .ladder { counter-reset: step; margin-top: 28px; }
+    .step { position: relative; margin-left: 28px; }
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: -42px;
+      top: 20px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #00111d;
+      background: var(--accent);
+      font-weight: 900;
+    }
+    input[type="range"] { width: 100%; }
+    .readout { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 16px; }
+    .pill { background: var(--accent-soft); border: 1px solid rgba(56,189,248,.28); border-radius: 999px; padding: 10px 14px; }
+    .pill strong { color: var(--good); }
+    canvas { width: 100%; height: 260px; background: #020617; border: 1px solid var(--line); border-radius: 16px; margin-top: 18px; }
+    .tiny { color: var(--muted); font-size: .95rem; }
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" href="../index.html">← Home</a>
+  <h1>Differentials</h1>
+  <p class="lead">A drill-down from the most basic idea: a differential is the tiny output movement caused by a tiny input movement.</p>
+
+  <section class="grid">
+    <div class="card">
+      <div class="tag">Level 0</div>
+      <h2>Change</h2>
+      <p>Start with only this: something moves.</p>
+      <div class="formula">\( dx = \text{a tiny move in } x \)</div>
+      <div class="formula">\( dy = \text{the matching tiny move in } y \)</div>
+    </div>
+    <div class="card">
+      <div class="tag">Level 1</div>
+      <h2>Connection</h2>
+      <p>A function connects input and output.</p>
+      <div class="formula">\( y = f(x) \)</div>
+      <p>If \(x\) moves, \(y\) usually moves.</p>
+    </div>
+    <div class="card">
+      <div class="tag">Level 2</div>
+      <h2>Local multiplier</h2>
+      <p>The derivative is the multiplier at one exact point.</p>
+      <div class="formula">\( \frac{dy}{dx} = f'(x) \)</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="tag">Core formula</div>
+    <h2>The whole idea in one line</h2>
+    <div class="formula">\( dy = f'(x)\,dx \)</div>
+    <p>Read it as: <strong>tiny output move = local multiplier × tiny input move</strong>.</p>
+  </section>
+
+  <section class="ladder">
+    <details class="step" open>
+      <summary>What is \(dx\)?</summary>
+      <p>The chosen input nudge. Example: move \(x\) from 3 to 3.01, so \(dx = 0.01\).</p>
+    </details>
+    <details class="step" open>
+      <summary>What is \(f'(x)\)?</summary>
+      <p>The slope right here, not globally. For \(y=x^2\), the slope is \(2x\). At \(x=3\), slope is 6.</p>
+    </details>
+    <details class="step" open>
+      <summary>What is \(dy\)?</summary>
+      <p>The predicted output nudge from the tangent line. At \(x=3\), \(dy = 6dx\).</p>
+    </details>
+    <details class="step" open>
+      <summary>Why is this not exactly \(\Delta y\)?</summary>
+      <p>\(\Delta y\) is the true curve movement. \(dy\) is the straight-line approximation. For tiny moves, they are almost the same.</p>
+    </details>
+  </section>
+
+  <section class="playground">
+    <div class="tag">Interactive</div>
+    <h2>Example: \(y=x^2\)</h2>
+    <p>Move \(dx\). The page compares the true change with the differential approximation.</p>
+    <label>x: <strong id="xLabel">3.00</strong></label>
+    <input id="x" type="range" min="-5" max="5" step="0.1" value="3" />
+    <label>dx: <strong id="dxLabel">0.10</strong></label>
+    <input id="dx" type="range" min="-1" max="1" step="0.01" value="0.10" />
+    <div class="readout">
+      <div class="pill">Slope \(f'(x)\): <strong id="slope">6.00</strong></div>
+      <div class="pill">Differential \(dy\): <strong id="dy">0.60</strong></div>
+      <div class="pill">True change \(\Delta y\): <strong id="delta">0.61</strong></div>
+      <div class="pill">Error: <strong id="error">0.01</strong></div>
+    </div>
+    <canvas id="chart" width="900" height="320"></canvas>
+    <p class="tiny">As \(dx\) gets smaller, the error shrinks. That is why differentials work.</p>
+  </section>
+</main>
+<script>
+  const xInput = document.getElementById('x');
+  const dxInput = document.getElementById('dx');
+  const ids = ['xLabel','dxLabel','slope','dy','delta','error'];
+  const el = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
+  const canvas = document.getElementById('chart');
+  const ctx = canvas.getContext('2d');
+
+  function mapX(x) { return 60 + (x + 6) / 12 * 780; }
+  function mapY(y) { return 280 - (y + 2) / 32 * 240; }
+  function f(x) { return x * x; }
+
+  function draw(x, dx) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#374151';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(60, mapY(0)); ctx.lineTo(840, mapY(0)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(mapX(0), 30); ctx.lineTo(mapX(0), 280); ctx.stroke();
+
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let px = -6; px <= 6; px += 0.05) {
+      const cx = mapX(px), cy = mapY(f(px));
+      if (px === -6) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+    }
+    ctx.stroke();
+
+    const slope = 2 * x;
+    ctx.strokeStyle = '#86efac';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let px = x - 2; px <= x + 2; px += 0.05) {
+      const tangentY = f(x) + slope * (px - x);
+      const cx = mapX(px), cy = mapY(tangentY);
+      if (px <= x - 1.99) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+    }
+    ctx.stroke();
+
+    const x2 = x + dx;
+    [[x, f(x), '#fff'], [x2, f(x2), '#fbbf24'], [x2, f(x) + slope * dx, '#86efac']].forEach(([px, py, color]) => {
+      ctx.fillStyle = color;
+      ctx.beginPath(); ctx.arc(mapX(px), mapY(py), 6, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+
+  function update() {
+    const x = Number(xInput.value);
+    const dx = Number(dxInput.value);
+    const slope = 2 * x;
+    const dy = slope * dx;
+    const delta = f(x + dx) - f(x);
+    el.xLabel.textContent = x.toFixed(2);
+    el.dxLabel.textContent = dx.toFixed(2);
+    el.slope.textContent = slope.toFixed(2);
+    el.dy.textContent = dy.toFixed(4);
+    el.delta.textContent = delta.toFixed(4);
+    el.error.textContent = Math.abs(delta - dy).toFixed(4);
+    draw(x, dx);
+  }
+
+  xInput.addEventListener('input', update);
+  dxInput.addEventListener('input', update);
+  update();
+</script>
+</body>
+</html>
